@@ -1,0 +1,2 @@
+# Copy to local.properties only when your IDE does not create it.
+sdk.dir=/opt/android-sdk

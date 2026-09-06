@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Y2 Remote</string>
+    <string name="title_paired_devices">Paired Devices</string>
+    <string name="status_disconnected">Disconnected</string>
+    <string name="status_connecting">Connecting...</string>
+    <string name="status_connected">Connected</string>
+    <string name="btn_connect">Connect</string>
+    <string name="btn_disconnect">Disconnect</string>
+    <string name="no_track">No Track</string>
+    <string name="unknown_artist">Unknown Artist</string>
+    <string name="unknown_album">Unknown Album</string>
+    <string name="time_zero">00:00</string>
+    <string name="btn_refresh">Refresh Devices</string>
+    <string name="status_error">Connection Error</string>
+    <string name="channel_name">Y2 Media Controls</string>
+    <string name="channel_description">Media controls and state synchronization for Y2 Player</string>
+</resources>

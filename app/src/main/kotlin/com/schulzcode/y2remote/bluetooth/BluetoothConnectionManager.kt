@@ -39,10 +39,16 @@ class BluetoothConnectionManager {
 
     @Volatile var currentState: ConnectionState = ConnectionState.Disconnected
         private set
+    @Volatile var lastPlayerState: RemoteMessage.PlayerState? = null
+        private set
+    @Volatile var lastArtwork: android.graphics.Bitmap? = null
+        private set
 
     fun addListener(listener: Listener) {
         listeners += listener
         listener.onConnectionStateChanged(currentState)
+        lastPlayerState?.let { listener.onPlayerStateReceived(it) }
+        lastArtwork?.let { listener.onArtworkReceived(it) }
     }
 
     fun removeListener(listener: Listener) {
@@ -51,6 +57,10 @@ class BluetoothConnectionManager {
 
     private fun updateState(newState: ConnectionState) {
         currentState = newState
+        if (newState is ConnectionState.Disconnected || newState is ConnectionState.Error) {
+            lastPlayerState = null
+            lastArtwork = null
+        }
         when (newState) {
             is ConnectionState.Connected -> RemoteLogger.log("BT", "CONNECTED to ${newState.deviceName} (${newState.address})")
             is ConnectionState.Connecting -> RemoteLogger.log("BT", "Connecting to ${newState.deviceName}...")
@@ -203,6 +213,7 @@ class BluetoothConnectionManager {
                     val message = RemoteProtocol.parseMessage(line) ?: continue
                     when (message) {
                         is RemoteMessage.PlayerState -> {
+                            lastPlayerState = message
                             RemoteLogger.log("RX", "Track: '${message.title}' by '${message.artist}' [${message.status}]")
                             listeners.forEach { it.onPlayerStateReceived(message) }
                         }
@@ -212,6 +223,7 @@ class BluetoothConnectionManager {
                                 val bytes = android.util.Base64.decode(message.base64, android.util.Base64.DEFAULT)
                                 android.graphics.BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
                             }.getOrNull()
+                            lastArtwork = bitmap
                             listeners.forEach { it.onArtworkReceived(bitmap) }
                         }
                         is RemoteMessage.Hello -> {

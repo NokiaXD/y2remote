@@ -27,6 +27,7 @@ import com.schulzcode.y2remote.databinding.ActivityMainBinding
 import com.schulzcode.y2remote.protocol.RemoteCommand
 import com.schulzcode.y2remote.protocol.RemoteProtocol
 import com.schulzcode.y2remote.service.RemoteControlService
+import com.schulzcode.y2remote.util.LastConnection
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -43,6 +44,7 @@ class MainActivity : AppCompatActivity() {
     private var remoteService: RemoteControlService? = null
     private var isBound = false
     private var isUserSeeking = false
+    private var autoConnectAttempted = false
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -61,6 +63,7 @@ class MainActivity : AppCompatActivity() {
             remoteService = binder.service
             viewModel.bindConnectionManager(binder.connectionManager)
             isBound = true
+            maybeAutoConnect(viewModel.pairedDevices.value)
         }
 
         override fun onServiceDisconnected(name: ComponentName?) {
@@ -134,6 +137,7 @@ class MainActivity : AppCompatActivity() {
             } else {
                 val selectedDevice = binding.spinnerDevices.selectedItem as? BluetoothDeviceItem
                 if (selectedDevice != null) {
+                    LastConnection.save(this, selectedDevice.device.address)
                     viewModel.connectToDevice(selectedDevice.device)
                 } else {
                     Toast.makeText(this, "Select a paired Y2 device first", Toast.LENGTH_SHORT).show()
@@ -216,6 +220,14 @@ class MainActivity : AppCompatActivity() {
                             setDropDownViewResource(R.layout.item_device_dropdown)
                         }
                         binding.spinnerDevices.adapter = adapter
+                        val savedAddress = LastConnection.load(this@MainActivity)
+                        if (savedAddress != null) {
+                            val savedIndex = devices.indexOfFirst { it.address == savedAddress }
+                            if (savedIndex >= 0) {
+                                binding.spinnerDevices.setSelection(savedIndex)
+                            }
+                        }
+                        maybeAutoConnect(devices)
                     }
                 }
 
@@ -310,6 +322,22 @@ class MainActivity : AppCompatActivity() {
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60
         return String.format(Locale.getDefault(), "%02d:%02d", minutes, seconds)
+    }
+
+    private fun maybeAutoConnect(devices: List<BluetoothDevice>) {
+        if (autoConnectAttempted || remoteService == null || devices.isEmpty()) return
+        val state = viewModel.connectionState.value
+        if (state is BluetoothConnectionManager.ConnectionState.Connected ||
+            state is BluetoothConnectionManager.ConnectionState.Connecting
+        ) return
+        val savedAddress = LastConnection.load(this) ?: return
+        val device = devices.firstOrNull { it.address == savedAddress } ?: return
+        val savedIndex = devices.indexOf(device)
+        if (savedIndex >= 0 && binding.spinnerDevices.selectedItemPosition != savedIndex) {
+            binding.spinnerDevices.setSelection(savedIndex)
+        }
+        autoConnectAttempted = true
+        viewModel.connectToDevice(device)
     }
 
     override fun onDestroy() {

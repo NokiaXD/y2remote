@@ -21,6 +21,7 @@ import com.schulzcode.y2remote.protocol.RemoteCommand
 import com.schulzcode.y2remote.protocol.RemoteMessage
 import com.schulzcode.y2remote.protocol.RemoteProtocol
 import com.schulzcode.y2remote.ui.MainActivity
+import com.schulzcode.y2remote.util.LastConnection
 
 class RemoteControlService : Service(), BluetoothConnectionManager.Listener {
 
@@ -92,24 +93,6 @@ class RemoteControlService : Service(), BluetoothConnectionManager.Listener {
                 }
             })
             isActive = true
-            val volumeProvider = object : VolumeProviderCompat(
-                VOLUME_CONTROL_RELATIVE,
-                100,
-                100
-            ) {
-                override fun onAdjustVolume(direction: Int) {
-                    if (direction > 0) {
-                        connectionManager.sendCommand(RemoteCommand.VolumeUp)
-                    } else if (direction < 0) {
-                        connectionManager.sendCommand(RemoteCommand.VolumeDown)
-                    }
-                }
-
-                override fun onSetVolumeTo(volume: Int) {
-                    connectionManager.sendCommand(RemoteCommand.SetVolume(volume))
-                }
-            }
-            setPlaybackToRemote(volumeProvider)
         }
     }
 
@@ -118,6 +101,7 @@ class RemoteControlService : Service(), BluetoothConnectionManager.Listener {
     override fun onConnectionStateChanged(state: BluetoothConnectionManager.ConnectionState) {
         when (state) {
             is BluetoothConnectionManager.ConnectionState.Connected -> {
+                LastConnection.save(this, state.address)
                 startForeground(NOTIFICATION_ID, buildNotification(lastState))
             }
             is BluetoothConnectionManager.ConnectionState.Disconnected,

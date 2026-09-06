@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.schulzcode.y2remote"
+    namespace = "com.nokia_xd.y2remote"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.schulzcode.y2remote"
+        applicationId = "com.nokia_xd.y2remote"
         minSdk = 26
         targetSdk = 35
         versionCode = 1

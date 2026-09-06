@@ -1,4 +1,4 @@
-package com.schulzcode.y2remote.ui
+package com.nokia_xd.y2remote.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -21,19 +21,19 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.schulzcode.y2remote.R
-import com.schulzcode.y2remote.bluetooth.BluetoothConnectionManager
-import com.schulzcode.y2remote.databinding.ActivityMainBinding
-import com.schulzcode.y2remote.protocol.RemoteCommand
-import com.schulzcode.y2remote.protocol.RemoteProtocol
-import com.schulzcode.y2remote.service.RemoteControlService
-import com.schulzcode.y2remote.util.LastConnection
+import com.nokia_xd.y2remote.R
+import com.nokia_xd.y2remote.bluetooth.BluetoothConnectionManager
+import com.nokia_xd.y2remote.databinding.ActivityMainBinding
+import com.nokia_xd.y2remote.protocol.RemoteCommand
+import com.nokia_xd.y2remote.protocol.RemoteProtocol
+import com.nokia_xd.y2remote.service.RemoteControlService
+import com.nokia_xd.y2remote.util.LastConnection
 import kotlinx.coroutines.launch
 import java.util.Locale
 
 import android.content.ClipData
 import android.content.ClipboardManager
-import com.schulzcode.y2remote.util.RemoteLogger
+import com.nokia_xd.y2remote.util.RemoteLogger
 
 @SuppressLint("MissingPermission")
 class MainActivity : AppCompatActivity() {

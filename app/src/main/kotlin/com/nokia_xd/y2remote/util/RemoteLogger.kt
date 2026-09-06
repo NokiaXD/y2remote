@@ -1,4 +1,4 @@
-package com.schulzcode.y2remote.util
+package com.nokia_xd.y2remote.util
 
 import android.util.Log
 import kotlinx.coroutines.flow.MutableStateFlow

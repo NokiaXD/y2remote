@@ -1,13 +1,13 @@
-package com.schulzcode.y2remote.bluetooth
+package com.nokia_xd.y2remote.bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothSocket
 import android.util.Log
-import com.schulzcode.y2remote.protocol.RemoteCommand
-import com.schulzcode.y2remote.protocol.RemoteMessage
-import com.schulzcode.y2remote.protocol.RemoteProtocol
-import com.schulzcode.y2remote.util.RemoteLogger
+import com.nokia_xd.y2remote.protocol.RemoteCommand
+import com.nokia_xd.y2remote.protocol.RemoteMessage
+import com.nokia_xd.y2remote.protocol.RemoteProtocol
+import com.nokia_xd.y2remote.util.RemoteLogger
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.IOException

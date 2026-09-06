@@ -1,4 +1,4 @@
-package com.schulzcode.y2remote.protocol
+package com.nokia_xd.y2remote.protocol
 
 import org.json.JSONObject
 import java.util.UUID

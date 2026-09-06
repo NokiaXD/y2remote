@@ -1,4 +1,4 @@
-package com.schulzcode.y2remote.ui
+package com.nokia_xd.y2remote.ui
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
@@ -6,10 +6,10 @@ import android.bluetooth.BluetoothDevice
 import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.schulzcode.y2remote.bluetooth.BluetoothConnectionManager
-import com.schulzcode.y2remote.protocol.RemoteCommand
-import com.schulzcode.y2remote.protocol.RemoteMessage
-import com.schulzcode.y2remote.protocol.RemoteProtocol
+import com.nokia_xd.y2remote.bluetooth.BluetoothConnectionManager
+import com.nokia_xd.y2remote.protocol.RemoteCommand
+import com.nokia_xd.y2remote.protocol.RemoteMessage
+import com.nokia_xd.y2remote.protocol.RemoteProtocol
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

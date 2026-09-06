@@ -1,4 +1,4 @@
-package com.schulzcode.y2remote.service
+package com.nokia_xd.y2remote.service
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -15,13 +15,13 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.app.NotificationCompat
 import androidx.media.VolumeProviderCompat
-import com.schulzcode.y2remote.R
-import com.schulzcode.y2remote.bluetooth.BluetoothConnectionManager
-import com.schulzcode.y2remote.protocol.RemoteCommand
-import com.schulzcode.y2remote.protocol.RemoteMessage
-import com.schulzcode.y2remote.protocol.RemoteProtocol
-import com.schulzcode.y2remote.ui.MainActivity
-import com.schulzcode.y2remote.util.LastConnection
+import com.nokia_xd.y2remote.R
+import com.nokia_xd.y2remote.bluetooth.BluetoothConnectionManager
+import com.nokia_xd.y2remote.protocol.RemoteCommand
+import com.nokia_xd.y2remote.protocol.RemoteMessage
+import com.nokia_xd.y2remote.protocol.RemoteProtocol
+import com.nokia_xd.y2remote.ui.MainActivity
+import com.nokia_xd.y2remote.util.LastConnection
 
 class RemoteControlService : Service(), BluetoothConnectionManager.Listener {
 
@@ -256,9 +256,9 @@ class RemoteControlService : Service(), BluetoothConnectionManager.Listener {
         const val CHANNEL_ID = "y2_remote_channel"
         const val NOTIFICATION_ID = 101
 
-        const val ACTION_PLAY = "com.schulzcode.y2remote.ACTION_PLAY"
-        const val ACTION_PAUSE = "com.schulzcode.y2remote.ACTION_PAUSE"
-        const val ACTION_PREV = "com.schulzcode.y2remote.ACTION_PREV"
-        const val ACTION_NEXT = "com.schulzcode.y2remote.ACTION_NEXT"
+        const val ACTION_PLAY = "com.nokia_xd.y2remote.ACTION_PLAY"
+        const val ACTION_PAUSE = "com.nokia_xd.y2remote.ACTION_PAUSE"
+        const val ACTION_PREV = "com.nokia_xd.y2remote.ACTION_PREV"
+        const val ACTION_NEXT = "com.nokia_xd.y2remote.ACTION_NEXT"
     }
 }

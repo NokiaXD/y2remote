@@ -43,6 +43,9 @@ class PlayerViewModel : ViewModel(), BluetoothConnectionManager.Listener {
 
     private var connectionManager: BluetoothConnectionManager? = null
     private var interpolationJob: Job? = null
+    private var volumeJob: Job? = null
+    private var lastVolumeSentTime = 0L
+    private val VOLUME_THROTTLE_MS = 100L
     private var lastStateReceivedAtUptime = 0L
     private var basePositionMs = 0L
 
@@ -71,9 +74,31 @@ class PlayerViewModel : ViewModel(), BluetoothConnectionManager.Listener {
         connectionManager?.sendCommand(command)
     }
 
-    fun setVolume(percent: Int) {
+    fun setVolume(percent: Int, immediate: Boolean = false) {
         _volumePercent.value = percent
-        sendCommand(RemoteCommand.SetVolume(percent))
+        val now = SystemClock.uptimeMillis()
+        if (immediate) {
+            volumeJob?.cancel()
+            volumeJob = null
+            lastVolumeSentTime = now
+            sendCommand(RemoteCommand.SetVolume(percent))
+        } else {
+            if (now - lastVolumeSentTime >= VOLUME_THROTTLE_MS) {
+                volumeJob?.cancel()
+                volumeJob = null
+                lastVolumeSentTime = now
+                sendCommand(RemoteCommand.SetVolume(percent))
+            } else if (volumeJob == null || !volumeJob!!.isActive) {
+                volumeJob = viewModelScope.launch {
+                    val waitTime = VOLUME_THROTTLE_MS - (SystemClock.uptimeMillis() - lastVolumeSentTime)
+                    if (waitTime > 0) {
+                        delay(waitTime)
+                    }
+                    lastVolumeSentTime = SystemClock.uptimeMillis()
+                    sendCommand(RemoteCommand.SetVolume(_volumePercent.value))
+                }
+            }
+        }
     }
 
     fun volumeUp() {
@@ -97,6 +122,8 @@ class PlayerViewModel : ViewModel(), BluetoothConnectionManager.Listener {
             state is BluetoothConnectionManager.ConnectionState.Error
         ) {
             stopInterpolation()
+            volumeJob?.cancel()
+            volumeJob = null
             _playerState.value = null
             _interpolatedPositionMs.value = 0L
             _artwork.value = null
@@ -105,7 +132,9 @@ class PlayerViewModel : ViewModel(), BluetoothConnectionManager.Listener {
 
     override fun onPlayerStateReceived(state: RemoteMessage.PlayerState) {
         _playerState.value = state
-        _volumePercent.value = state.volumePercent
+        if (volumeJob == null && (SystemClock.uptimeMillis() - lastVolumeSentTime >= 600L)) {
+            _volumePercent.value = state.volumePercent
+        }
         basePositionMs = state.positionMs
         lastStateReceivedAtUptime = SystemClock.uptimeMillis()
         _interpolatedPositionMs.value = state.positionMs

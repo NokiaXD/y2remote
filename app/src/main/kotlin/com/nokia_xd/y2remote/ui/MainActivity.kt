@@ -31,10 +31,6 @@ import com.nokia_xd.y2remote.util.LastConnection
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import com.nokia_xd.y2remote.util.RemoteLogger
-
 @SuppressLint("MissingPermission")
 class MainActivity : AppCompatActivity() {
 
@@ -44,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     private var remoteService: RemoteControlService? = null
     private var isBound = false
     private var isUserSeeking = false
+    private var isUserAdjustingVolume = false
     private var autoConnectAttempted = false
 
     private val permissionLauncher = registerForActivityResult(
@@ -145,18 +142,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        binding.btnClearLogs.setOnClickListener {
-            RemoteLogger.clear()
-        }
-
-        binding.btnCopyLogs.setOnClickListener {
-            val logsText = binding.tvLogs.text.toString()
-            val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-            val clip = ClipData.newPlainText("Y2 Remote Logs", logsText)
-            clipboard?.setPrimaryClip(clip)
-            Toast.makeText(this, "Logs copied to clipboard!", Toast.LENGTH_SHORT).show()
-        }
-
         binding.btnPlayPause.setOnClickListener {
             viewModel.sendCommand(RemoteCommand.Toggle)
         }
@@ -180,11 +165,19 @@ class MainActivity : AppCompatActivity() {
         binding.seekBarVolume.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    viewModel.setVolume(progress)
+                    viewModel.setVolume(progress, immediate = false)
                 }
             }
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                isUserAdjustingVolume = true
+            }
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                isUserAdjustingVolume = false
+                val targetProgress = seekBar?.progress ?: return
+                viewModel.setVolume(targetProgress, immediate = true)
+            }
         })
 
         binding.seekBarProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
@@ -267,7 +260,9 @@ class MainActivity : AppCompatActivity() {
 
                 launch {
                     viewModel.volumePercent.collect { vol ->
-                        binding.seekBarVolume.progress = vol
+                        if (!isUserAdjustingVolume) {
+                            binding.seekBarVolume.progress = vol
+                        }
                     }
                 }
 
@@ -301,15 +296,6 @@ class MainActivity : AppCompatActivity() {
                         if (!isUserSeeking) {
                             binding.seekBarProgress.progress = posMs.toInt()
                             binding.tvCurrentPosition.text = formatDuration(posMs)
-                        }
-                    }
-                }
-
-                launch {
-                    RemoteLogger.logs.collect { lines ->
-                        binding.tvLogs.text = lines.joinToString("\n")
-                        binding.scrollLogs.post {
-                            binding.scrollLogs.fullScroll(android.view.View.FOCUS_DOWN)
                         }
                     }
                 }

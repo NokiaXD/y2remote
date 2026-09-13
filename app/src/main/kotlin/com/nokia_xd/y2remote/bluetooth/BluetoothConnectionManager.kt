@@ -8,13 +8,19 @@ import com.nokia_xd.y2remote.protocol.RemoteCommand
 import com.nokia_xd.y2remote.protocol.RemoteMessage
 import com.nokia_xd.y2remote.protocol.RemoteProtocol
 import com.nokia_xd.y2remote.util.RemoteLogger
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.BufferedReader
 import java.io.BufferedWriter
 import java.io.IOException
 import java.io.InputStreamReader
 import java.io.OutputStreamWriter
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
 
 @SuppressLint("MissingPermission")
 class BluetoothConnectionManager {
@@ -27,15 +33,31 @@ class BluetoothConnectionManager {
     }
 
     interface Listener {
-        fun onConnectionStateChanged(state: ConnectionState)
-        fun onPlayerStateReceived(state: RemoteMessage.PlayerState)
-        fun onArtworkReceived(bitmap: android.graphics.Bitmap?)
+        fun onConnectionStateChanged(state: ConnectionState) {}
+        fun onPlayerStateReceived(state: RemoteMessage.PlayerState) {}
+        fun onArtworkReceived(bitmap: android.graphics.Bitmap?) {}
+        fun onEventQueueChanged(reason: String, revision: Long) {}
+        fun onEventLibraryChanged(revision: Long) {}
     }
 
     private val listeners = CopyOnWriteArraySet<Listener>()
     private val isConnectingOrConnected = AtomicBoolean(false)
     private var connectThread: ConnectThread? = null
     @Volatile private var connectedWorker: ConnectedWorker? = null
+    private val mainHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    @Volatile private var targetDevice: BluetoothDevice? = null
+    private val reconnectRunnable = Runnable {
+        val dev = targetDevice
+        if (dev != null && isConnectingOrConnected.get() && connectedWorker == null) {
+            RemoteLogger.log("BT", "Auto-reconnecting to ${dev.name ?: dev.address}...")
+            val thread = ConnectThread(dev)
+            connectThread = thread
+            thread.start()
+        }
+    }
+
+    private val pendingRequests = ConcurrentHashMap<Long, CompletableDeferred<RemoteMessage>>()
+    private val nextRequestId = AtomicLong(1L)
 
     @Volatile var currentState: ConnectionState = ConnectionState.Disconnected
         private set
@@ -60,6 +82,7 @@ class BluetoothConnectionManager {
         if (newState is ConnectionState.Disconnected || newState is ConnectionState.Error) {
             lastPlayerState = null
             lastArtwork = null
+            cancelAllPendingRequests()
         }
         when (newState) {
             is ConnectionState.Connected -> RemoteLogger.log("BT", "CONNECTED to ${newState.deviceName} (${newState.address})")
@@ -73,6 +96,7 @@ class BluetoothConnectionManager {
     @Synchronized
     fun connect(device: BluetoothDevice) {
         disconnect()
+        targetDevice = device
         isConnectingOrConnected.set(true)
         val devName = device.name ?: device.address
         RemoteLogger.log("BT", "Initiating connection to $devName (${device.address})")
@@ -84,11 +108,14 @@ class BluetoothConnectionManager {
 
     @Synchronized
     fun disconnect() {
+        targetDevice = null
+        mainHandler.removeCallbacks(reconnectRunnable)
         isConnectingOrConnected.set(false)
         connectThread?.cancel()
         connectThread = null
         connectedWorker?.cancel()
         connectedWorker = null
+        cancelAllPendingRequests()
         updateState(ConnectionState.Disconnected)
     }
 
@@ -96,6 +123,167 @@ class BluetoothConnectionManager {
         val json = RemoteProtocol.encodeCommand(command)
         RemoteLogger.log("TX", "Command -> $json")
         connectedWorker?.send(json)
+    }
+
+    private fun cancelAllPendingRequests() {
+        pendingRequests.forEach { (_, deferred) -> deferred.cancel() }
+        pendingRequests.clear()
+    }
+
+    suspend fun sendRequest(messageJson: String, requestId: Long, timeoutMs: Long = 3000L): RemoteMessage? {
+        val worker = connectedWorker ?: run {
+            RemoteLogger.log("BT", "sendRequest failed: worker is null (not connected)")
+            return null
+        }
+        val deferred = CompletableDeferred<RemoteMessage>()
+        pendingRequests[requestId] = deferred
+        try {
+            RemoteLogger.log("TX", "Request #$requestId -> ${messageJson.take(120)}")
+            worker.send(messageJson)
+            val response = withTimeoutOrNull(timeoutMs) {
+                deferred.await()
+            }
+            if (response == null) {
+                RemoteLogger.log("BT", "Request #$requestId timed out after ${timeoutMs}ms")
+            }
+            return response
+        } finally {
+            pendingRequests.remove(requestId)
+        }
+    }
+
+    // --- Request Helpers ---
+
+    suspend fun requestLibraryPage(scope: String, sort: String, query: String, offset: Int, limit: Int): RemoteMessage.LibraryPageResult? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeLibraryPage(scope, sort, query, offset, limit, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.LibraryPageResult
+    }
+
+    suspend fun requestLibrarySummary(): RemoteMessage.LibrarySummary? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeLibrarySummaryRequest(reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.LibrarySummary
+    }
+
+    suspend fun requestLibraryArtwork(trackId: Long): RemoteMessage.LibraryArtworkResult? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeLibraryArtworkRequest(trackId, reqId)
+        return sendRequest(json, reqId, timeoutMs = 4000L) as? RemoteMessage.LibraryArtworkResult
+    }
+
+    suspend fun requestPlaylistsList(): RemoteMessage.PlaylistsList? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodePlaylistsListRequest(reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.PlaylistsList
+    }
+
+    suspend fun requestPlaylistsTracks(playlistId: Long, offset: Int, limit: Int): RemoteMessage.PlaylistsTracks? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodePlaylistsTracksRequest(playlistId, offset, limit, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.PlaylistsTracks
+    }
+
+    suspend fun requestPlaylistsCreate(name: String): RemoteMessage.PlaylistsMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodePlaylistsCreate(name, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.PlaylistsMutate
+    }
+
+    suspend fun requestPlaylistsRename(playlistId: Long, name: String): RemoteMessage.PlaylistsMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodePlaylistsRename(playlistId, name, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.PlaylistsMutate
+    }
+
+    suspend fun requestPlaylistsDelete(playlistId: Long): RemoteMessage.PlaylistsMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodePlaylistsDelete(playlistId, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.PlaylistsMutate
+    }
+
+    suspend fun requestPlaylistsAddTrack(playlistId: Long, trackId: Long): RemoteMessage.PlaylistsMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodePlaylistsAddTrack(playlistId, trackId, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.PlaylistsMutate
+    }
+
+    suspend fun requestPlaylistsRemoveTrack(playlistId: Long, trackId: Long): RemoteMessage.PlaylistsMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodePlaylistsRemoveTrack(playlistId, trackId, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.PlaylistsMutate
+    }
+
+    suspend fun requestQueueState(offset: Int = 0, limit: Int = 20): RemoteMessage.QueueState? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueStateRequest(reqId, offset, limit)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueState
+    }
+
+    suspend fun requestQueueReplace(trackIds: List<Long>, startIndex: Int = 0, shuffled: Boolean = false): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueReplace(trackIds, startIndex, shuffled, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueuePlayNext(trackIds: List<Long>): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueuePlayNext(trackIds, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueueAddToUpNext(trackIds: List<Long>): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueAddToUpNext(trackIds, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueueRemove(entryId: Long): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueRemoveEntry(entryId, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueueMove(entryId: Long, delta: Int): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueMoveEntry(entryId, delta, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueuePromote(entryId: Long): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueuePromoteEntry(entryId, reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueueShuffleToggle(): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueShuffleToggle(reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueueRepeatCycle(): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueRepeatCycle(reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueueClearUpNext(): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueClearUpNext(reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueueClearRemaining(): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueClearRemaining(reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
+    }
+
+    suspend fun requestQueueClear(): RemoteMessage.QueueMutate? {
+        val reqId = nextRequestId.getAndIncrement()
+        val json = RemoteProtocol.encodeQueueClear(reqId)
+        return sendRequest(json, reqId) as? RemoteMessage.QueueMutate
     }
 
     private inner class ConnectThread(private val device: BluetoothDevice) : Thread("y2-client-connect") {
@@ -130,7 +318,7 @@ class BluetoothConnectionManager {
                 }
             }
 
-            // Strategy 1: Insecure RFCOMM with custom UUID (best for Android 4.4 + modern Android)
+            // Strategy 1: Insecure RFCOMM with custom UUID
             if (connectedSocket == null) {
                 connectedSocket = tryConnectSocket("Strategy 1 (Insecure RFCOMM + Custom UUID)") {
                     device.createInsecureRfcommSocketToServiceRecord(RemoteProtocol.UUID_Y2_REMOTE)
@@ -151,7 +339,7 @@ class BluetoothConnectionManager {
                 }
             }
 
-            // Strategy 4: Direct Channel 1 Insecure Reflection (MediaTek / KitKat direct port)
+            // Strategy 4: Direct Channel 1 Insecure Reflection
             if (connectedSocket == null) {
                 connectedSocket = tryConnectSocket("Strategy 4 (Reflection Insecure Channel 1)") {
                     val method = device.javaClass.getMethod("createInsecureRfcommSocket", Int::class.javaPrimitiveType)
@@ -170,13 +358,17 @@ class BluetoothConnectionManager {
             if (connectedSocket != null && isConnectingOrConnected.get()) {
                 socket = connectedSocket
                 val devName = device.name ?: device.address
-                updateState(ConnectionState.Connected(devName, device.address))
                 val worker = ConnectedWorker(connectedSocket, device)
                 connectedWorker = worker
                 worker.start()
+                updateState(ConnectionState.Connected(devName, device.address))
             } else {
                 runCatching { socket?.close() }
-                if (isConnectingOrConnected.get()) {
+                if (isConnectingOrConnected.get() && targetDevice != null) {
+                    updateState(ConnectionState.Error("Retrying connection in 3s..."))
+                    mainHandler.removeCallbacks(reconnectRunnable)
+                    mainHandler.postDelayed(reconnectRunnable, 3000L)
+                } else if (isConnectingOrConnected.get()) {
                     isConnectingOrConnected.set(false)
                     updateState(ConnectionState.Error("All connection strategies failed. Ensure Y2Player is running on Y2."))
                 }
@@ -192,17 +384,34 @@ class BluetoothConnectionManager {
         private val socket: BluetoothSocket,
         private val device: BluetoothDevice
     ) : Thread("y2-client-worker") {
-        private val writeLock = Any()
-        @Volatile private var writer: BufferedWriter? = null
+        private val writer = BufferedWriter(OutputStreamWriter(socket.outputStream, Charsets.UTF_8))
+        private val reader = BufferedReader(InputStreamReader(socket.inputStream, Charsets.UTF_8))
+        private val outboundQueue = LinkedBlockingQueue<String>(64)
         @Volatile var isRunning = true
 
-        override fun run() {
-            var reader: BufferedReader? = null
+        private val writerThread = Thread({
             try {
-                val out = BufferedWriter(OutputStreamWriter(socket.outputStream, Charsets.UTF_8))
-                writer = out
-                reader = BufferedReader(InputStreamReader(socket.inputStream, Charsets.UTF_8))
+                while (isRunning && isConnectingOrConnected.get()) {
+                    val msg = outboundQueue.poll(500, TimeUnit.MILLISECONDS) ?: continue
+                    try {
+                        writer.write(msg)
+                        writer.write("\n")
+                        writer.flush()
+                    } catch (e: IOException) {
+                        Log.e(TAG, "Failed to send message: ${e.message}")
+                        cancel()
+                        break
+                    }
+                }
+            } catch (_: InterruptedException) {
+            } finally {
+                runCatching { writer.close() }
+            }
+        }, "y2-client-sender").apply { isDaemon = true }
 
+        override fun run() {
+            writerThread.start()
+            try {
                 // Send Hello
                 val hello = RemoteProtocol.encodeHello()
                 send(hello)
@@ -229,6 +438,49 @@ class BluetoothConnectionManager {
                         is RemoteMessage.Hello -> {
                             RemoteLogger.log("RX", "Handshake from Y2: ${message.device} (v${message.protocol})")
                         }
+                        is RemoteMessage.EventQueueChanged -> {
+                            RemoteLogger.log("RX", "Event: Queue Changed (reason: ${message.reason}, rev: ${message.revision})")
+                            listeners.forEach { it.onEventQueueChanged(message.reason, message.revision) }
+                        }
+                        is RemoteMessage.EventLibraryChanged -> {
+                            RemoteLogger.log("RX", "Event: Library Changed (rev: ${message.revision})")
+                            listeners.forEach { it.onEventLibraryChanged(message.revision) }
+                        }
+
+                        // Response Messages completed via pendingRequests
+                        is RemoteMessage.LibraryPageResult -> {
+                            RemoteLogger.log("RX", "Response #${message.requestId} LibraryPageResult (rows: ${message.rows.size}, total: ${message.total})")
+                            pendingRequests[message.requestId]?.complete(message)
+                        }
+                        is RemoteMessage.LibrarySummary -> {
+                            RemoteLogger.log("RX", "Response #${message.requestId} LibrarySummary (genres: ${message.genres.size}, total: ${message.total})")
+                            pendingRequests[message.requestId]?.complete(message)
+                        }
+                        is RemoteMessage.LibraryArtworkResult -> {
+                            RemoteLogger.log("RX", "Response #${message.requestId} LibraryArtworkResult")
+                            pendingRequests[message.requestId]?.complete(message)
+                        }
+                        is RemoteMessage.PlaylistsList -> {
+                            RemoteLogger.log("RX", "Response #${message.requestId} PlaylistsList (count: ${message.items.size})")
+                            pendingRequests[message.requestId]?.complete(message)
+                        }
+                        is RemoteMessage.PlaylistsTracks -> {
+                            RemoteLogger.log("RX", "Response #${message.requestId} PlaylistsTracks (rows: ${message.rows.size}, total: ${message.total})")
+                            pendingRequests[message.requestId]?.complete(message)
+                        }
+                        is RemoteMessage.PlaylistsMutate -> {
+                            RemoteLogger.log("RX", "Response #${message.requestId} PlaylistsMutate (ok: ${message.ok})")
+                            pendingRequests[message.requestId]?.complete(message)
+                        }
+                        is RemoteMessage.QueueState -> {
+                            RemoteLogger.log("RX", "Response #${message.requestId} QueueState (entries: ${message.entries.size})")
+                            pendingRequests[message.requestId]?.complete(message)
+                        }
+                        is RemoteMessage.QueueMutate -> {
+                            RemoteLogger.log("RX", "Response #${message.requestId} QueueMutate (ok: ${message.ok})")
+                            pendingRequests[message.requestId]?.complete(message)
+                        }
+
                         else -> {
                             RemoteLogger.log("RX", "Message: $line")
                         }
@@ -240,32 +492,31 @@ class BluetoothConnectionManager {
                 }
             } finally {
                 isRunning = false
+                writerThread.interrupt()
+                outboundQueue.clear()
                 runCatching { reader?.close() }
                 runCatching { writer?.close() }
                 runCatching { socket.close() }
                 if (isConnectingOrConnected.get()) {
                     updateState(ConnectionState.Disconnected)
+                    if (targetDevice != null) {
+                        RemoteLogger.log("BT", "Disconnected unexpectedly; auto-reconnecting in 2s...")
+                        mainHandler.removeCallbacks(reconnectRunnable)
+                        mainHandler.postDelayed(reconnectRunnable, 2000L)
+                    }
                 }
             }
         }
 
         fun send(message: String) {
             if (!isRunning) return
-            try {
-                synchronized(writeLock) {
-                    val w = writer ?: return
-                    w.write(message)
-                    w.write("\n")
-                    w.flush()
-                }
-            } catch (e: IOException) {
-                Log.e(TAG, "Failed to send command: ${e.message}")
-                cancel()
-            }
+            outboundQueue.offer(message)
         }
 
         fun cancel() {
             isRunning = false
+            writerThread.interrupt()
+            outboundQueue.clear()
             runCatching { socket.close() }
         }
     }
@@ -274,3 +525,4 @@ class BluetoothConnectionManager {
         private const val TAG = "Y2BluetoothClient"
     }
 }
+

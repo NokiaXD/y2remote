@@ -131,17 +131,39 @@ class RemoteControlService : Service(), BluetoothConnectionManager.Listener {
     }
 
     override fun onPlayerStateReceived(state: RemoteMessage.PlayerState) {
+        val previousState = lastState
         lastState = state
-        updateMediaMetadata(state)
+
+        val trackChanged = previousState == null ||
+            previousState.title != state.title ||
+            previousState.artist != state.artist ||
+            previousState.album != state.album ||
+            previousState.durationMs != state.durationMs
+
+        val statusChanged = previousState == null || previousState.status != state.status
+
+        val positionJumped = previousState == null ||
+            Math.abs(state.positionMs - previousState.positionMs) > 3000L
+
+        if (trackChanged) {
+            updateMediaMetadata(state)
+        }
+
         val playbackState = when (state.status) {
             RemoteProtocol.STATUS_PLAYING -> PlaybackStateCompat.STATE_PLAYING
             RemoteProtocol.STATUS_PAUSED -> PlaybackStateCompat.STATE_PAUSED
             else -> PlaybackStateCompat.STATE_STOPPED
         }
-        updatePlaybackState(playbackState, state.positionMs)
-        val notification = buildNotification(state)
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-            .notify(NOTIFICATION_ID, notification)
+
+        if (statusChanged || trackChanged || positionJumped) {
+            updatePlaybackState(playbackState, state.positionMs)
+        }
+
+        if (statusChanged || trackChanged) {
+            val notification = buildNotification(state)
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                .notify(NOTIFICATION_ID, notification)
+        }
     }
 
     private fun updateMediaMetadata(state: RemoteMessage.PlayerState) {

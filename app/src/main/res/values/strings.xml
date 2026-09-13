@@ -14,4 +14,35 @@
     <string name="status_error">Connection Error</string>
     <string name="channel_name">Y2 Media Controls</string>
     <string name="channel_description">Media controls and state synchronization for Y2 Player</string>
+
+    <!-- Navigation Tabs -->
+    <string name="nav_player">Player</string>
+    <string name="nav_library">Library</string>
+    <string name="nav_playlists">Playlists</string>
+    <string name="nav_queue">Queue</string>
+
+    <!-- Library -->
+    <string name="search_hint">Search songs, artists, albums...</string>
+    <string name="scope_all">All Music</string>
+    <string name="empty_library">No tracks found</string>
+
+    <!-- Playlists -->
+    <string name="create_playlist">New Playlist</string>
+    <string name="rename_playlist">Rename</string>
+    <string name="delete_playlist">Delete</string>
+    <string name="empty_playlists">No playlists available</string>
+
+    <!-- Queue -->
+    <string name="empty_queue">Playback queue is empty</string>
+    <string name="queue_up_next">Up Next</string>
+    <string name="queue_remaining">Remaining</string>
+    <string name="queue_promote">Play Next</string>
+    <string name="queue_remove">Remove</string>
+    <string name="queue_clear_up_next">Clear Up Next</string>
+    <string name="queue_clear_remaining">Clear Remaining</string>
+    <string name="queue_clear_all">Clear All</string>
+    <string name="feature_disabled_library">Library sharing is disabled on the player</string>
+    <string name="feature_disabled_playlists">Playlist sharing is disabled on the player</string>
+    <string name="feature_disabled_queue">Queue sharing is disabled on the player</string>
 </resources>
+

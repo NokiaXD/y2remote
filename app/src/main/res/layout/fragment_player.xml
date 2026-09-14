@@ -71,7 +71,7 @@
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnRefresh"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
                         android:layout_width="0dp"
                         android:layout_height="52dp"
                         android:layout_weight="1"
@@ -84,7 +84,7 @@
                         android:id="@+id/btnConnect"
                         android:layout_width="0dp"
                         android:layout_height="52dp"
-                        android:layout_weight="1.2"
+                        android:layout_weight="1"
                         android:layout_marginStart="8dp"
                         android:text="@string/btn_connect"
                         app:cornerRadius="10dp" />
@@ -243,7 +243,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_skip_previous"
+                        android:src="@drawable/ic_volume_down"
                         android:contentDescription="Volume Down" />
 
                     <SeekBar
@@ -259,7 +259,7 @@
                         android:layout_width="40dp"
                         android:layout_height="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_skip_next"
+                        android:src="@drawable/ic_volume_up"
                         android:contentDescription="Volume Up" />
                 </LinearLayout>
 

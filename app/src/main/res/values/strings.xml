@@ -23,8 +23,13 @@
 
     <!-- Library -->
     <string name="search_hint">Search songs, artists, albums...</string>
-    <string name="scope_all">All Music</string>
     <string name="empty_library">No tracks found</string>
+    <string name="sort_title">Title</string>
+    <string name="sort_artist">Artist</string>
+    <string name="sort_album">Album</string>
+    <string name="sort_year">Year</string>
+    <string name="sort_added">Date Added</string>
+    <string name="sort_recent">Recently Modified</string>
 
     <!-- Playlists -->
     <string name="create_playlist">New Playlist</string>
@@ -44,5 +49,13 @@
     <string name="feature_disabled_library">Library sharing is disabled on the player</string>
     <string name="feature_disabled_playlists">Playlist sharing is disabled on the player</string>
     <string name="feature_disabled_queue">Queue sharing is disabled on the player</string>
+
+    <!-- Library Sync -->
+    <string name="sync_library">Sync Library</string>
+    <string name="sync_in_progress">Syncing library…</string>
+    <string name="sync_completed">Library synchronized</string>
+    <string name="sync_not_connected">Connect to Y2 Player to sync</string>
+    <string name="sync_status_fmt">Synced: %s</string>
+    <string name="sync_never">Not synchronized yet</string>
 </resources>
 

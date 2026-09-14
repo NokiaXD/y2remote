@@ -16,6 +16,8 @@ class LibraryCache(maxEntries: Int = 5000) {
         tracks.forEach { memory.put(it.id, it) }
     }
 
+    fun getAll(): List<TrackRow> = memory.snapshot().values.toList()
+
     fun clear() {
         memory.evictAll()
     }

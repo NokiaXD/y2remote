@@ -80,16 +80,18 @@ data class GenreCount(val key: String, val label: String, val count: Int) {
     }
 }
 
-data class YearCount(val year: Int?, val count: Int) {
+data class YearCount(val year: Int?, val count: Int, val artworkTrackId: Long? = null) {
     fun toJson(): JSONObject = JSONObject().apply {
         if (year != null) put("year", year) else put("year", JSONObject.NULL)
         put("count", count)
+        if (artworkTrackId != null) put("artworkTrackId", artworkTrackId)
     }
 
     companion object {
         fun fromJson(json: JSONObject): YearCount = YearCount(
             year = if (json.has("year") && !json.isNull("year")) json.optInt("year") else null,
-            count = json.optInt("count", 0)
+            count = json.optInt("count", 0),
+            artworkTrackId = if (json.has("artworkTrackId") && !json.isNull("artworkTrackId")) json.optLong("artworkTrackId") else null
         )
     }
 }
@@ -221,7 +223,8 @@ sealed class RemoteMessage {
         val rows: List<TrackRow>,
         val total: Int,
         val hasMore: Boolean,
-        val requestId: Long
+        val requestId: Long,
+        val trackIds: List<Long> = emptyList()
     ) : RemoteMessage()
 
     data class PlaylistsCreateRequest(
@@ -551,13 +554,24 @@ object RemoteProtocol {
         }.toString()
     }
 
-    fun encodePlaylistsTracks(playlistId: Long, rows: List<TrackRow>, total: Int, hasMore: Boolean, requestId: Long): String {
-        val rowsArray = JSONArray().apply { rows.forEach { put(it.toJson()) } }
+    fun encodePlaylistsTracks(
+        playlistId: Long,
+        rows: List<TrackRow>,
+        total: Int,
+        hasMore: Boolean,
+        requestId: Long,
+        trackIds: List<Long> = emptyList()
+    ): String {
         return JSONObject().apply {
             put("type", TYPE_PLAYLISTS_TRACKS_RESULT)
             put("id", requestId)
             put("playlistId", playlistId)
-            put("rows", rowsArray)
+            if (trackIds.isNotEmpty()) {
+                put("trackIds", JSONArray().apply { trackIds.forEach { put(it) } })
+            }
+            if (rows.isNotEmpty()) {
+                put("rows", JSONArray().apply { rows.forEach { put(it.toJson()) } })
+            }
             put("total", total)
             put("hasMore", hasMore)
         }.toString()
@@ -615,7 +629,7 @@ object RemoteProtocol {
         }.toString()
     }
 
-    fun encodeQueueStateRequest(requestId: Long, offset: Int = 0, limit: Int = 20): String {
+    fun encodeQueueStateRequest(requestId: Long, offset: Int = 0, limit: Int = 100): String {
         return JSONObject().apply {
             put("type", TYPE_QUEUE_STATE)
             put("id", requestId)
@@ -867,6 +881,11 @@ object RemoteProtocol {
                     )
                 }
                 TYPE_PLAYLISTS_TRACKS_RESULT -> {
+                    val trackIdsArray = json.optJSONArray("trackIds")
+                    val trackIds = if (trackIdsArray != null) {
+                        (0 until trackIdsArray.length()).map { trackIdsArray.getLong(it) }
+                    } else emptyList()
+
                     val rowsArray = json.optJSONArray("rows") ?: JSONArray()
                     val rows = (0 until rowsArray.length()).map { i ->
                         TrackRow.fromJson(rowsArray.getJSONObject(i))
@@ -876,7 +895,8 @@ object RemoteProtocol {
                         rows = rows,
                         total = json.optInt("total", 0),
                         hasMore = json.optBoolean("hasMore", false),
-                        requestId = json.optLong("id", 0L)
+                        requestId = json.optLong("id", 0L),
+                        trackIds = trackIds
                     )
                 }
                 TYPE_PLAYLISTS_CREATE -> {

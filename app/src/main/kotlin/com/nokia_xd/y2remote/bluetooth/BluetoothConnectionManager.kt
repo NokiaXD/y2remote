@@ -181,7 +181,7 @@ class BluetoothConnectionManager {
     suspend fun requestPlaylistsTracks(playlistId: Long, offset: Int, limit: Int): RemoteMessage.PlaylistsTracks? {
         val reqId = nextRequestId.getAndIncrement()
         val json = RemoteProtocol.encodePlaylistsTracksRequest(playlistId, offset, limit, reqId)
-        return sendRequest(json, reqId) as? RemoteMessage.PlaylistsTracks
+        return sendRequest(json, reqId, timeoutMs = 8000L) as? RemoteMessage.PlaylistsTracks
     }
 
     suspend fun requestPlaylistsCreate(name: String): RemoteMessage.PlaylistsMutate? {
@@ -214,7 +214,7 @@ class BluetoothConnectionManager {
         return sendRequest(json, reqId) as? RemoteMessage.PlaylistsMutate
     }
 
-    suspend fun requestQueueState(offset: Int = 0, limit: Int = 20): RemoteMessage.QueueState? {
+    suspend fun requestQueueState(offset: Int = 0, limit: Int = 100): RemoteMessage.QueueState? {
         val reqId = nextRequestId.getAndIncrement()
         val json = RemoteProtocol.encodeQueueStateRequest(reqId, offset, limit)
         return sendRequest(json, reqId) as? RemoteMessage.QueueState

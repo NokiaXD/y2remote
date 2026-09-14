@@ -17,6 +17,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+import com.nokia_xd.y2remote.protocol.TrackRow
+
 data class QueueItemUi(
     val entry: QueueEntryRow,
     val isCurrent: Boolean
@@ -25,6 +27,7 @@ data class QueueItemUi(
 class QueueAdapter(
     private val artworkCache: ArtworkCache?,
     private val coroutineScope: CoroutineScope,
+    private val trackLookup: ((Long) -> TrackRow?)? = null,
     private val onPromoteClick: (QueueEntryRow) -> Unit,
     private val onRemoveClick: (QueueEntryRow) -> Unit,
     private val onStartDrag: (RecyclerView.ViewHolder) -> Unit
@@ -94,8 +97,8 @@ class QueueAdapter(
 
         fun bind(item: QueueItemUi, position: Int) {
             val entry = item.entry
-            val track = entry.track
             val trackId = entry.trackId
+            val track = entry.track ?: trackLookup?.invoke(trackId)
             currentTrackId = trackId
 
             val isCurrent = item.isCurrent

@@ -45,6 +45,7 @@ class QueueFragment : Fragment() {
         val adapter = QueueAdapter(
             artworkCache = viewModel.artworkCache,
             coroutineScope = viewLifecycleOwner.lifecycleScope,
+            trackLookup = { trackId -> viewModel.localDatabase.getTrack(trackId) },
             onPromoteClick = { entry ->
                 viewModel.promoteQueueEntry(entry.entryId)
             },

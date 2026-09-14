@@ -41,7 +41,7 @@ class MediaTileAdapter(
         private var artworkJob: Job? = null
 
         fun bind(tile: MediaTile) {
-            binding.tvTileTitle.text = tile.title.ifEmpty { "Unknown" }
+            binding.tvTileTitle.text = tile.title.ifEmpty { binding.root.context.getString(R.string.unknown_label) }
             binding.tvTileSubtitle.text = tile.subtitle
             binding.ivTileArt.setImageResource(R.drawable.ic_music_library)
 

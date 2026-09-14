@@ -82,10 +82,10 @@ class ArtistYearOverviewDialogFragment : DialogFragment() {
         }
 
         val isArtist = tile.type == TileType.ARTIST
-        binding.tvCategoryType.text = if (isArtist) "Artist" else "Year"
+        binding.tvCategoryType.text = getString(if (isArtist) R.string.tile_type_artist else R.string.tile_type_year)
         binding.tvHeaderTitle.text = tile.title
         binding.tvHeaderSubtitle.text = tile.subtitle
-        binding.tvSectionLabel.text = if (isArtist) "DISCOGRAPHY / ALBUMS" else "ALBUMS FROM THIS YEAR"
+        binding.tvSectionLabel.text = getString(if (isArtist) R.string.section_discography else R.string.section_albums_from_year)
 
         // Load header artwork
         tile.artworkTrackId?.let { trackId ->
@@ -117,8 +117,8 @@ class ArtistYearOverviewDialogFragment : DialogFragment() {
         val totalSongs = parentTile.tracks.size
         val allSongsTile = MediaTile(
             id = "${parentTile.id}:all_tracks",
-            title = "All Songs",
-            subtitle = if (totalSongs == 1) "1 song" else "$totalSongs songs",
+            title = getString(R.string.tile_all_songs),
+            subtitle = resources.getQuantityString(R.plurals.count_songs, totalSongs, totalSongs),
             artworkTrackId = parentTile.artworkTrackId,
             tracks = parentTile.tracks,
             type = TileType.ALBUM
@@ -135,7 +135,7 @@ class ArtistYearOverviewDialogFragment : DialogFragment() {
                 MediaTile(
                     id = "album:$albumName",
                     title = albumName,
-                    subtitle = if (songCount == 1) "1 song" else "$songCount songs",
+                    subtitle = resources.getQuantityString(R.plurals.count_songs, songCount, songCount),
                     artworkTrackId = artTrackId,
                     tracks = albumTracks,
                     type = TileType.ALBUM
@@ -153,8 +153,8 @@ class ArtistYearOverviewDialogFragment : DialogFragment() {
             subTiles.add(
                 MediaTile(
                     id = "${parentTile.id}:singles",
-                    title = "Singles / Other",
-                    subtitle = if (singleCount == 1) "1 song" else "$singleCount songs",
+                    title = getString(R.string.tile_singles_other),
+                    subtitle = resources.getQuantityString(R.plurals.count_songs, singleCount, singleCount),
                     artworkTrackId = artTrackId,
                     tracks = singles,
                     type = TileType.ALBUM
@@ -163,8 +163,8 @@ class ArtistYearOverviewDialogFragment : DialogFragment() {
         }
 
         val albumCount = albumsGrouped.size
-        val albumStr = if (albumCount == 1) "1 album" else "$albumCount albums"
-        val songStr = if (parentTile.tracks.size == 1) "1 song" else "${parentTile.tracks.size} songs"
+        val albumStr = resources.getQuantityString(R.plurals.count_albums, albumCount, albumCount)
+        val songStr = resources.getQuantityString(R.plurals.count_songs, parentTile.tracks.size, parentTile.tracks.size)
         binding.tvHeaderStats.text = "$albumStr • $songStr"
 
         tileAdapter = MediaTileAdapter(

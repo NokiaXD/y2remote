@@ -57,13 +57,14 @@ class TrackAdapter(
         private var artworkJob: Job? = null
 
         fun bind(track: TrackRow) {
+            val ctx = binding.root.context
             currentTrackId = track.id
-            binding.tvTrackTitle.text = track.title.ifEmpty { "Unknown Title" }
+            binding.tvTrackTitle.text = track.title.ifEmpty { ctx.getString(R.string.unknown_title) }
             binding.tvTrackSubtitle.text = buildString {
                 if (track.artist.isNotEmpty()) append(track.artist)
                 if (track.artist.isNotEmpty() && track.album.isNotEmpty()) append(" • ")
                 if (track.album.isNotEmpty()) append(track.album)
-            }.ifEmpty { "Unknown Artist" }
+            }.ifEmpty { ctx.getString(R.string.unknown_artist) }
 
             binding.tvTrackDuration.text = formatDuration(track.durationMs)
             binding.ivTrackArt.setImageResource(R.drawable.ic_notification)
@@ -74,11 +75,11 @@ class TrackAdapter(
 
             binding.btnTrackOptions.setOnClickListener { view ->
                 val popup = PopupMenu(view.context, view)
-                popup.menu.add(0, 1, 0, "Play Next")
-                popup.menu.add(0, 2, 1, "Add to Up Next")
-                popup.menu.add(0, 3, 2, "Add to Playlist")
+                popup.menu.add(0, 1, 0, R.string.track_action_play_next)
+                popup.menu.add(0, 2, 1, R.string.track_action_add_to_up_next)
+                popup.menu.add(0, 3, 2, R.string.track_action_add_to_playlist)
                 if (isPlaylistMode) {
-                    popup.menu.add(0, 4, 3, "Remove from Playlist")
+                    popup.menu.add(0, 4, 3, R.string.track_action_remove_from_playlist)
                 }
                 popup.setOnMenuItemClickListener { menuItem ->
                     when (menuItem.itemId) {

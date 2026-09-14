@@ -27,7 +27,7 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_notification"
-            android:contentDescription="Track Artwork" />
+            android:contentDescription="@string/cd_track_artwork" />
     </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
@@ -73,5 +73,5 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_more_vert"
         app:tint="@color/text_secondary"
-        android:contentDescription="Options" />
+        android:contentDescription="@string/cd_options" />
 </LinearLayout>

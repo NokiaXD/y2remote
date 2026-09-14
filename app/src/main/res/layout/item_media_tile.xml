@@ -27,7 +27,7 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:src="@drawable/ic_music_library"
-                android:contentDescription="Tile Artwork" />
+                android:contentDescription="@string/cd_tile_artwork" />
         </com.nokia_xd.y2remote.ui.SquareFrameLayout>
 
         <LinearLayout

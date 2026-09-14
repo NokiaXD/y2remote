@@ -24,11 +24,11 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerInside"
+            android:scaleType="fitCenter"
             android:padding="8dp"
             android:src="@drawable/ic_playlist"
             app:tint="@color/accent"
-            android:contentDescription="Playlist Icon" />
+            android:contentDescription="@string/cd_playlist_icon" />
     </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
@@ -63,5 +63,5 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_more_vert"
         app:tint="@color/text_secondary"
-        android:contentDescription="Playlist Options" />
+        android:contentDescription="@string/cd_playlist_options" />
 </LinearLayout>

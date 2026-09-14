@@ -15,15 +15,34 @@
     <string name="channel_name">Y2 Media Controls</string>
     <string name="channel_description">Media controls and state synchronization for Y2 Player</string>
 
+    <!-- Common buttons -->
+    <string name="common_ok">OK</string>
+    <string name="common_cancel">Cancel</string>
+    <string name="common_create">Create</string>
+    <string name="common_rename">Rename</string>
+    <string name="common_delete">Delete</string>
+
     <!-- Navigation Tabs -->
     <string name="nav_player">Player</string>
     <string name="nav_library">Library</string>
     <string name="nav_playlists">Playlists</string>
     <string name="nav_queue">Queue</string>
 
+    <!-- Player screen -->
+    <string name="player_header_label">INNIOASIS Y2 CONNECTION</string>
+    <string name="cd_album_art">Album Art</string>
+    <string name="cd_previous">Previous</string>
+    <string name="cd_play_pause">Play/Pause</string>
+    <string name="cd_next">Next</string>
+    <string name="cd_volume_down">Volume Down</string>
+    <string name="cd_volume_up">Volume Up</string>
+
     <!-- Library -->
     <string name="search_hint">Search songs, artists, albums...</string>
     <string name="empty_library">No tracks found</string>
+    <string name="unknown_title">Unknown Title</string>
+    <string name="unknown_year">Unknown Year</string>
+    <string name="unknown_label">Unknown</string>
     <string name="sort_title">Title</string>
     <string name="sort_artist">Artist</string>
     <string name="sort_album">Album</string>
@@ -31,11 +50,25 @@
     <string name="sort_added">Date Added</string>
     <string name="sort_recent">Recently Modified</string>
 
+    <!-- Tracks / Track row -->
+    <string name="cd_track_artwork">Track Artwork</string>
+    <string name="cd_options">Options</string>
+    <string name="track_action_play_next">Play Next</string>
+    <string name="track_action_add_to_up_next">Add to Up Next</string>
+    <string name="track_action_add_to_playlist">Add to Playlist</string>
+    <string name="track_action_remove_from_playlist">Remove from Playlist</string>
+
     <!-- Playlists -->
     <string name="create_playlist">New Playlist</string>
     <string name="rename_playlist">Rename</string>
     <string name="delete_playlist">Delete</string>
     <string name="empty_playlists">No playlists available</string>
+    <string name="playlist_name_hint">Playlist Name</string>
+    <string name="delete_playlist_confirm_fmt">Are you sure you want to delete \'%1$s\'?</string>
+    <string name="cd_playlist_icon">Playlist Icon</string>
+    <string name="cd_playlist_options">Playlist Options</string>
+    <string name="playlist_subtitle">Playlist</string>
+    <string name="playlist_load_error">Error loading playlist tracks</string>
 
     <!-- Queue -->
     <string name="empty_queue">Playback queue is empty</string>
@@ -46,6 +79,46 @@
     <string name="queue_clear_up_next">Clear Up Next</string>
     <string name="queue_clear_remaining">Clear Remaining</string>
     <string name="queue_clear_all">Clear All</string>
+    <string name="cd_shuffle">Shuffle</string>
+    <string name="cd_repeat">Repeat</string>
+    <string name="cd_menu">Menu</string>
+    <string name="cd_playing">Playing</string>
+    <string name="cd_artwork">Artwork</string>
+    <string name="cd_promote">Promote</string>
+    <string name="cd_remove">Remove</string>
+    <string name="cd_drag_to_reorder">Drag to reorder</string>
+
+    <!-- Tile / dialogs -->
+    <string name="cd_tile_artwork">Tile Artwork</string>
+    <string name="cd_header_artwork">Header Artwork</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_play_all">Play All</string>
+    <string name="tile_type_artist">Artist</string>
+    <string name="tile_type_year">Year</string>
+    <string name="section_discography">DISCOGRAPHY / ALBUMS</string>
+    <string name="section_albums_from_year">ALBUMS FROM THIS YEAR</string>
+    <string name="tile_all_songs">All Songs</string>
+    <string name="tile_singles_other">Singles / Other</string>
+    <string name="single_or_other">Single / Other</string>
+    <plurals name="count_songs">
+        <item quantity="one">1 song</item>
+        <item quantity="other">%d songs</item>
+    </plurals>
+    <plurals name="count_albums">
+        <item quantity="one">1 album</item>
+        <item quantity="other">%d albums</item>
+    </plurals>
+    <string name="filter_all_albums_fmt">All Albums (%1$d)</string>
+    <string name="filter_album_count_fmt">%1$s (%2$d)</string>
+
+    <!-- Add-to-playlist dialog -->
+    <string name="dialog_no_playlists">No Playlists</string>
+    <string name="dialog_no_playlists_message">No playlists available to add this track.</string>
+    <string name="dialog_no_playlists_message_create_first">Create a playlist first from the Playlists tab.</string>
+    <string name="dialog_add_to_playlist">Add to Playlist</string>
+    <string name="dialog_no_other_playlists">No Other Playlists</string>
+
+    <!-- Feature disabled -->
     <string name="feature_disabled_library">Library sharing is disabled on the player</string>
     <string name="feature_disabled_playlists">Playlist sharing is disabled on the player</string>
     <string name="feature_disabled_queue">Queue sharing is disabled on the player</string>
@@ -55,7 +128,25 @@
     <string name="sync_in_progress">Syncing library…</string>
     <string name="sync_completed">Library synchronized</string>
     <string name="sync_not_connected">Connect to Y2 Player to sync</string>
-    <string name="sync_status_fmt">Synced: %s</string>
+    <string name="sync_status_fmt">Synced: %1$s</string>
     <string name="sync_never">Not synchronized yet</string>
-</resources>
+    <string name="sync_channel_name">Library Synchronization</string>
+    <string name="sync_channel_description">Progress for syncing songs and artwork</string>
+    <string name="sync_started">Starting synchronization…</string>
+    <string name="sync_saving">Saving songs to local cache…</string>
+    <string name="sync_organizing_art">Organizing artwork in cache…</string>
+    <string name="sync_error_connect">Connect to player to sync</string>
+    <string name="sync_error_receive">Error receiving data from player</string>
+    <string name="sync_error_generic">Sync error</string>
+    <string name="sync_notification_error_title">Sync Error</string>
+    <string name="sync_artwork_title">Downloading artwork</string>
+    <string name="sync_songs_fmt">Syncing songs (%1$d/%2$d)…</string>
+    <string name="sync_artwork_fmt">Downloading artwork (%1$d/%2$d)…</string>
+    <string name="sync_completed_fmt">Sync completed (%1$s)</string>
 
+    <!-- Media notification actions -->
+    <string name="media_action_previous">Previous</string>
+    <string name="media_action_play">Play</string>
+    <string name="media_action_pause">Pause</string>
+    <string name="media_action_next">Next</string>
+</resources>

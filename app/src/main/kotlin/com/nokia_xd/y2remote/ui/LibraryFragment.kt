@@ -156,7 +156,7 @@ class LibraryFragment : Fragment() {
                         val populatedTile = tile.copy(
                             tracks = yearTracks,
                             artworkTrackId = yearTracks.firstOrNull { it.hasArtwork }?.id ?: yearTracks.firstOrNull()?.id,
-                            subtitle = if (yearTracks.size == 1) "1 song" else "${yearTracks.size} songs"
+                            subtitle = resources.getQuantityString(R.plurals.count_songs, yearTracks.size, yearTracks.size)
                         )
                         viewModel.selectTile(populatedTile)
                         ArtistYearOverviewDialogFragment.newInstance().show(childFragmentManager, "artist_year_overview")
@@ -229,9 +229,10 @@ class LibraryFragment : Fragment() {
                 viewModel.refreshLibrary()
             }
             val artMap = viewModel.yearArtworkMap.value
+            val unknownYear = getString(R.string.unknown_year)
 
             val missingArtYears = years.filter { y ->
-                val yrStr = y.year?.toString() ?: "Unknown Year"
+                val yrStr = y.year?.toString() ?: unknownYear
                 (y.artworkTrackId == null || y.artworkTrackId == 0L) && !artMap.containsKey(yrStr)
             }.mapNotNull { it.year?.toString() }
 
@@ -240,12 +241,12 @@ class LibraryFragment : Fragment() {
             }
 
             val tiles = years.map { y ->
-                val yrStr = y.year?.toString() ?: "Unknown Year"
+                val yrStr = y.year?.toString() ?: unknownYear
                 val resolvedArtTrackId = artMap[yrStr] ?: y.artworkTrackId?.takeIf { it > 0L }
                 MediaTile(
                     id = "year:$yrStr",
                     title = yrStr,
-                    subtitle = if (y.count == 1) "1 song" else "${y.count} songs",
+                    subtitle = resources.getQuantityString(R.plurals.count_songs, y.count, y.count),
                     artworkTrackId = resolvedArtTrackId,
                     tracks = emptyList(),
                     type = TileType.YEAR
@@ -280,7 +281,7 @@ class LibraryFragment : Fragment() {
                         val dominantArtist = primaryArtists.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
                             ?: albumTracks.firstOrNull()?.artist.orEmpty()
 
-                        val songsCount = if (albumTracks.size == 1) "1 song" else "${albumTracks.size} songs"
+                        val songsCount = resources.getQuantityString(R.plurals.count_songs, albumTracks.size, albumTracks.size)
                         MediaTile(
                             id = "album:$albumName",
                             title = albumName,
@@ -305,8 +306,8 @@ class LibraryFragment : Fragment() {
                 artistMap.map { (artistName, artistTracks) ->
                     val firstWithArt = artistTracks.firstOrNull { it.hasArtwork }?.id ?: artistTracks.firstOrNull()?.id
                     val albumCount = artistTracks.map { it.album.trim() }.filter { it.isNotBlank() }.distinct().size
-                    val albumStr = if (albumCount == 1) "1 album" else "$albumCount albums"
-                    val songStr = if (artistTracks.size == 1) "1 song" else "${artistTracks.size} songs"
+                    val albumStr = resources.getQuantityString(R.plurals.count_albums, albumCount, albumCount)
+                    val songStr = resources.getQuantityString(R.plurals.count_songs, artistTracks.size, artistTracks.size)
                     val subtitle = if (albumCount > 0) "$albumStr • $songStr" else songStr
                     MediaTile(
                         id = "artist:$artistName",
@@ -455,21 +456,21 @@ class LibraryFragment : Fragment() {
         val playlists = viewModel.playlists.value
         if (playlists.isEmpty()) {
             AlertDialog.Builder(requireContext())
-                .setTitle("No Playlists")
-                .setMessage("Create a playlist first from the Playlists tab.")
-                .setPositiveButton("OK", null)
+                .setTitle(R.string.dialog_no_playlists)
+                .setMessage(R.string.dialog_no_playlists_message_create_first)
+                .setPositiveButton(R.string.common_ok, null)
                 .show()
             return
         }
 
         val names = playlists.map { it.name }.toTypedArray()
         AlertDialog.Builder(requireContext())
-            .setTitle("Add to Playlist")
+            .setTitle(R.string.dialog_add_to_playlist)
             .setItems(names) { _, which ->
                 val targetPlaylist = playlists[which]
                 viewModel.addTrackToPlaylist(targetPlaylist.id, track.id)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.common_cancel, null)
             .show()
     }
 

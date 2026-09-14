@@ -90,7 +90,7 @@ class PlaylistTracksDialogFragment : DialogFragment() {
         ViewCompat.requestApplyInsets(binding.root)
 
         binding.tvPlaylistTitle.text = playlistName
-        binding.tvPlaylistSubtitle.text = "Playlist"
+        binding.tvPlaylistSubtitle.text = getString(R.string.playlist_subtitle)
 
         binding.btnBack.setOnClickListener {
             dismiss()
@@ -131,7 +131,7 @@ class PlaylistTracksDialogFragment : DialogFragment() {
         adapter.addLoadStateListener { loadState ->
             val isListEmpty = loadState.refresh is androidx.paging.LoadState.NotLoading && adapter.itemCount == 0
             if (loadState.refresh is androidx.paging.LoadState.Error) {
-                binding.tvEmptyTracks.text = "Error loading playlist tracks"
+                binding.tvEmptyTracks.text = getString(R.string.playlist_load_error)
                 binding.tvEmptyTracks.visibility = View.VISIBLE
             } else if (isListEmpty) {
                 binding.tvEmptyTracks.text = getString(R.string.empty_library)
@@ -186,21 +186,21 @@ class PlaylistTracksDialogFragment : DialogFragment() {
         val playlists = viewModel.playlists.value.filter { it.id != playlistId }
         if (playlists.isEmpty()) {
             AlertDialog.Builder(requireContext())
-                .setTitle("No Other Playlists")
-                .setMessage("No other playlists available to add this track.")
-                .setPositiveButton("OK", null)
+                .setTitle(R.string.dialog_no_other_playlists)
+                .setMessage(R.string.dialog_no_playlists_message)
+                .setPositiveButton(R.string.common_ok, null)
                 .show()
             return
         }
 
         val names = playlists.map { it.name }.toTypedArray()
         AlertDialog.Builder(requireContext())
-            .setTitle("Add to Playlist")
+            .setTitle(R.string.dialog_add_to_playlist)
             .setItems(names) { _, which ->
                 val target = playlists[which]
                 viewModel.addTrackToPlaylist(target.id, track.id)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.common_cancel, null)
             .show()
     }
 

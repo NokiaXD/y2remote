@@ -19,7 +19,7 @@
         android:src="@drawable/ic_play"
         app:tint="@color/accent"
         android:visibility="gone"
-        android:contentDescription="Playing" />
+        android:contentDescription="@string/cd_playing" />
 
     <TextView
         android:id="@+id/tvQueueIndex"
@@ -46,7 +46,7 @@
             android:layout_height="match_parent"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_notification"
-            android:contentDescription="Artwork" />
+            android:contentDescription="@string/cd_artwork" />
     </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout
@@ -83,7 +83,7 @@
                 android:paddingBottom="1dp"
                 android:textColor="#AAAAAA"
                 android:textSize="10sp"
-                android:text="Up Next"
+                android:text="@string/queue_up_next"
                 android:layout_marginEnd="6dp"
                 android:visibility="gone" />
 
@@ -105,7 +105,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_arrow_upward"
         app:tint="@color/text_secondary"
-        android:contentDescription="Promote" />
+        android:contentDescription="@string/cd_promote" />
 
     <ImageButton
         android:id="@+id/btnRemove"
@@ -114,14 +114,14 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@drawable/ic_delete"
         app:tint="@color/text_secondary"
-        android:contentDescription="Remove" />
+        android:contentDescription="@string/cd_remove" />
 
     <ImageView
         android:id="@+id/ivDragHandle"
         android:layout_width="32dp"
         android:layout_height="36dp"
-        android:scaleType="centerInside"
+        android:scaleType="fitCenter"
         android:src="@drawable/ic_drag_handle"
         app:tint="@color/text_secondary"
-        android:contentDescription="Drag to reorder" />
+        android:contentDescription="@string/cd_drag_to_reorder" />
 </LinearLayout>

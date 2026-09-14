@@ -132,11 +132,11 @@ class QueueAdapter(
                     if (track.artist.isNotEmpty() && track.album.isNotEmpty()) append(" • ")
                     if (track.album.isNotEmpty()) append(track.album)
                 }
-            }.ifEmpty { "Unknown Artist" }
+            }.ifEmpty { binding.root.context.getString(R.string.unknown_artist) }
 
             if (entry.origin == "up_next" || entry.origin == "user") {
                 binding.tvOriginBadge.visibility = View.VISIBLE
-                binding.tvOriginBadge.text = "Up Next"
+                binding.tvOriginBadge.text = binding.root.context.getString(R.string.queue_up_next)
             } else {
                 binding.tvOriginBadge.visibility = View.GONE
             }

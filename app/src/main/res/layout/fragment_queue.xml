@@ -33,7 +33,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_shuffle"
             app:tint="@color/text_secondary"
-            android:contentDescription="Shuffle" />
+            android:contentDescription="@string/cd_shuffle" />
 
         <ImageButton
             android:id="@+id/btnCycleRepeat"
@@ -42,7 +42,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_repeat"
             app:tint="@color/text_secondary"
-            android:contentDescription="Repeat" />
+            android:contentDescription="@string/cd_repeat" />
 
         <ImageButton
             android:id="@+id/btnQueueMenu"
@@ -51,7 +51,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_more_vert"
             app:tint="@color/text_secondary"
-            android:contentDescription="Menu" />
+            android:contentDescription="@string/cd_menu" />
     </LinearLayout>
 
     <FrameLayout

@@ -100,7 +100,8 @@ class MediaGroupDetailDialogFragment : DialogFragment() {
             return
         }
 
-        val albums = tile.tracks.map { it.album.ifEmpty { "Single / Other" } }.distinct()
+        val singleOrOther = getString(R.string.single_or_other)
+        val albums = tile.tracks.map { it.album.ifEmpty { singleOrOther } }.distinct()
         if (albums.size <= 1) {
             binding.scrollSubFilters.visibility = View.GONE
             return
@@ -111,7 +112,7 @@ class MediaGroupDetailDialogFragment : DialogFragment() {
 
         // "All Albums" chip
         val allChip = Chip(requireContext()).apply {
-            text = "All Albums (${tile.tracks.size})"
+            text = getString(R.string.filter_all_albums_fmt, tile.tracks.size)
             isCheckable = true
             isChecked = true
             setOnClickListener {
@@ -122,9 +123,9 @@ class MediaGroupDetailDialogFragment : DialogFragment() {
         binding.chipGroupSubFilters.addView(allChip)
 
         albums.forEach { albumName ->
-            val albumTracks = tile.tracks.filter { (it.album.ifEmpty { "Single / Other" }) == albumName }
+            val albumTracks = tile.tracks.filter { (it.album.ifEmpty { singleOrOther }) == albumName }
             val chip = Chip(requireContext()).apply {
-                text = "$albumName (${albumTracks.size})"
+                text = getString(R.string.filter_album_count_fmt, albumName, albumTracks.size)
                 isCheckable = true
                 setOnClickListener {
                     displayedTracks = albumTracks
@@ -197,21 +198,21 @@ class MediaGroupDetailDialogFragment : DialogFragment() {
         val playlists = viewModel.playlists.value
         if (playlists.isEmpty()) {
             AlertDialog.Builder(requireContext())
-                .setTitle("No Playlists")
-                .setMessage("No playlists available to add this track.")
-                .setPositiveButton("OK", null)
+                .setTitle(R.string.dialog_no_playlists)
+                .setMessage(R.string.dialog_no_playlists_message)
+                .setPositiveButton(R.string.common_ok, null)
                 .show()
             return
         }
 
         val names = playlists.map { it.name }.toTypedArray()
         AlertDialog.Builder(requireContext())
-            .setTitle("Add to Playlist")
+            .setTitle(R.string.dialog_add_to_playlist)
             .setItems(names) { _, which ->
                 val target = playlists[which]
                 viewModel.addTrackToPlaylist(target.id, track.id)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.common_cancel, null)
             .show()
     }
 

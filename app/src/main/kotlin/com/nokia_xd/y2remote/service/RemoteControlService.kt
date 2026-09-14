@@ -224,17 +224,17 @@ class RemoteControlService : Service(), BluetoothConnectionManager.Listener {
 
         builder.addAction(
             R.drawable.ic_skip_previous,
-            "Previous",
+            getString(R.string.media_action_previous),
             createActionIntent(ACTION_PREV)
         )
         .addAction(
             if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play,
-            if (isPlaying) "Pause" else "Play",
+            getString(if (isPlaying) R.string.media_action_pause else R.string.media_action_play),
             createActionIntent(if (isPlaying) ACTION_PAUSE else ACTION_PLAY)
         )
         .addAction(
             R.drawable.ic_skip_next,
-            "Next",
+            getString(R.string.media_action_next),
             createActionIntent(ACTION_NEXT)
         )
         .setStyle(

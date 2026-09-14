@@ -23,7 +23,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_arrow_back"
             app:tint="?attr/colorOnSurface"
-            android:contentDescription="Back" />
+            android:contentDescription="@string/cd_back" />
 
         <TextView
             android:id="@+id/tvCategoryType"
@@ -44,7 +44,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_play"
             app:tint="?attr/colorPrimary"
-            android:contentDescription="Play All" />
+            android:contentDescription="@string/cd_play_all" />
     </LinearLayout>
 
     <!-- Header Card -->
@@ -81,7 +81,7 @@
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
                     android:src="@drawable/ic_music_library"
-                    android:contentDescription="Header Artwork" />
+                    android:contentDescription="@string/cd_header_artwork" />
             </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
@@ -129,7 +129,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginTop="6dp"
         android:layout_marginBottom="6dp"
-        android:text="DISCOGRAPHY / ALBUMS"
+        android:text="@string/section_discography"
         android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="12sp"
         android:textStyle="bold"

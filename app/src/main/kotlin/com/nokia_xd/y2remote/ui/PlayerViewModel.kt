@@ -12,6 +12,7 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.nokia_xd.y2remote.R
 import com.nokia_xd.y2remote.bluetooth.BluetoothConnectionManager
 import com.nokia_xd.y2remote.data.ArtworkCache
 import com.nokia_xd.y2remote.data.LibraryCache
@@ -144,18 +145,25 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
         if (mgr == null || _connectionState.value !is BluetoothConnectionManager.ConnectionState.Connected) {
             _syncProgress.value = SyncProgress(
                 isSyncing = false,
-                error = "Connect to player to sync"
+                error = getApplication<Application>().getString(R.string.sync_error_connect)
             )
             return
         }
 
         if (_syncProgress.value.isSyncing) return
 
+        val app = getApplication<Application>()
+        val syncTitle = app.getString(R.string.sync_library)
+        val startedMsg = app.getString(R.string.sync_started)
+        val artTitle = app.getString(R.string.sync_artwork_title)
+        val savingMsg = app.getString(R.string.sync_saving)
+        val organizingMsg = app.getString(R.string.sync_organizing_art)
+
         viewModelScope.launch(Dispatchers.IO) {
-            _syncProgress.value = SyncProgress(isSyncing = true, statusText = "Starting synchronization...")
+            _syncProgress.value = SyncProgress(isSyncing = true, statusText = startedMsg)
             syncNotificationHelper.showProgress(
-                title = "Syncing library",
-                message = "Starting synchronization...",
+                title = syncTitle,
+                message = startedMsg,
                 current = 0,
                 max = 0,
                 indeterminate = true
@@ -170,7 +178,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                 while (hasMore) {
                     val page = mgr.requestLibraryPage("all", "title", "", offset, limit)
                     if (page == null) {
-                        val errMsg = "Error receiving data from player"
+                        val errMsg = app.getString(R.string.sync_error_receive)
                         _syncProgress.value = SyncProgress(
                             isSyncing = false,
                             error = errMsg
@@ -186,7 +194,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                     hasMore = page.hasMore && page.rows.isNotEmpty()
 
                     val currentTotal = if (totalCount > 0) totalCount else allTracks.size
-                    val statusMsg = "Syncing songs (${allTracks.size}/$currentTotal)..."
+                    val statusMsg = app.getString(R.string.sync_songs_fmt, allTracks.size, currentTotal)
                     _syncProgress.value = SyncProgress(
                         isSyncing = true,
                         current = allTracks.size,
@@ -194,7 +202,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                         statusText = statusMsg
                     )
                     syncNotificationHelper.showProgress(
-                        title = "Syncing library",
+                        title = syncTitle,
                         message = statusMsg,
                         current = allTracks.size,
                         max = currentTotal,
@@ -203,8 +211,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                 }
 
                 syncNotificationHelper.showProgress(
-                    title = "Syncing library",
-                    message = "Saving songs to local cache...",
+                    title = syncTitle,
+                    message = savingMsg,
                     current = allTracks.size,
                     max = allTracks.size,
                     indeterminate = true
@@ -233,7 +241,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                     if (totalToFetch > 0) {
                         for (trackId in toFetch) {
                             fetchedCount++
-                            val artMsg = "Downloading artwork ($fetchedCount/$totalToFetch)..."
+                            val artMsg = app.getString(R.string.sync_artwork_fmt, fetchedCount, totalToFetch)
                             _syncProgress.value = SyncProgress(
                                 isSyncing = true,
                                 current = fetchedCount,
@@ -241,7 +249,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                                 statusText = artMsg
                             )
                             syncNotificationHelper.showProgress(
-                                title = "Downloading artwork",
+                                title = artTitle,
                                 message = artMsg,
                                 current = fetchedCount,
                                 max = totalToFetch,
@@ -254,8 +262,8 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                     // For all other tracks in each album, copy the cover on disk so every track and tile has it
                     if (albumGroups.isNotEmpty()) {
                         syncNotificationHelper.showProgress(
-                            title = "Downloading artwork",
-                            message = "Organizing artwork in cache...",
+                            title = artTitle,
+                            message = organizingMsg,
                             current = totalToFetch,
                             max = if (totalToFetch > 0) totalToFetch else 1,
                             indeterminate = true
@@ -276,12 +284,12 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                     _allKnownTracks.value = allTracks
                     _libraryRefreshTrigger.value = SystemClock.uptimeMillis()
                     val count = allTracks.size
-                    val songsText = if (count == 1) "1 song" else "$count songs"
+                    val songsText = app.resources.getQuantityString(R.plurals.count_songs, count, count)
                     _syncProgress.value = SyncProgress(
                         isSyncing = false,
                         current = allTracks.size,
                         total = allTracks.size,
-                        statusText = "Sync completed ($songsText)"
+                        statusText = app.getString(R.string.sync_completed_fmt, songsText)
                     )
                 }
 
@@ -290,7 +298,7 @@ class PlayerViewModel(application: Application) : AndroidViewModel(application),
                 loadPlaylists()
                 refreshLibrarySummary()
             } catch (e: Exception) {
-                val errMsg = e.message ?: "Sync error"
+                val errMsg = e.message ?: app.getString(R.string.sync_error_generic)
                 _syncProgress.value = SyncProgress(
                     isSyncing = false,
                     error = errMsg

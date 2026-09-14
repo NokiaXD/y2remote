@@ -103,7 +103,7 @@ class PlaylistsFragment : Fragment() {
 
     private fun showCreatePlaylistDialog() {
         val input = EditText(requireContext()).apply {
-            hint = "Playlist Name"
+            hint = getString(R.string.playlist_name_hint)
             setSingleLine()
         }
         val container = FrameLayout(requireContext()).apply {
@@ -115,13 +115,13 @@ class PlaylistsFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.create_playlist)
             .setView(container)
-            .setPositiveButton("Create") { _, _ ->
+            .setPositiveButton(R.string.common_create) { _, _ ->
                 val name = input.text.toString().trim()
                 if (name.isNotEmpty()) {
                     viewModel.createPlaylist(name)
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.common_cancel, null)
             .show()
     }
 
@@ -140,24 +140,24 @@ class PlaylistsFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.rename_playlist)
             .setView(container)
-            .setPositiveButton("Rename") { _, _ ->
+            .setPositiveButton(R.string.common_rename) { _, _ ->
                 val newName = input.text.toString().trim()
                 if (newName.isNotEmpty() && newName != playlist.name) {
                     viewModel.renamePlaylist(playlist.id, newName)
                 }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.common_cancel, null)
             .show()
     }
 
     private fun showDeletePlaylistDialog(playlist: PlaylistRow) {
         AlertDialog.Builder(requireContext())
             .setTitle(R.string.delete_playlist)
-            .setMessage("Are you sure you want to delete '${playlist.name}'?")
-            .setPositiveButton("Delete") { _, _ ->
+            .setMessage(getString(R.string.delete_playlist_confirm_fmt, playlist.name))
+            .setPositiveButton(R.string.common_delete) { _, _ ->
                 viewModel.deletePlaylist(playlist.id)
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(R.string.common_cancel, null)
             .show()
     }
 

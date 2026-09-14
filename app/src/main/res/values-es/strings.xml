@@ -1,0 +1,152 @@
+<resources>
+    <string name="app_name">Y2 Remote</string>
+    <string name="title_paired_devices">Dispositivos emparejados</string>
+    <string name="status_disconnected">Desconectado</string>
+    <string name="status_connecting">Conectando…</string>
+    <string name="status_connected">Conectado</string>
+    <string name="btn_connect">Conectar</string>
+    <string name="btn_disconnect">Desconectar</string>
+    <string name="no_track">Sin pista</string>
+    <string name="unknown_artist">Artista desconocido</string>
+    <string name="unknown_album">Álbum desconocido</string>
+    <string name="time_zero">00:00</string>
+    <string name="btn_refresh">Actualizar</string>
+    <string name="status_error">Error de conexión</string>
+    <string name="channel_name">Controles multimedia Y2</string>
+    <string name="channel_description">Controles multimedia y sincronización de estado del reproductor Y2</string>
+
+    <!-- Common buttons -->
+    <string name="common_ok">Aceptar</string>
+    <string name="common_cancel">Cancelar</string>
+    <string name="common_create">Crear</string>
+    <string name="common_rename">Renombrar</string>
+    <string name="common_delete">Eliminar</string>
+
+    <!-- Navigation Tabs -->
+    <string name="nav_player">Reproductor</string>
+    <string name="nav_library">Biblioteca</string>
+    <string name="nav_playlists">Playlists</string>
+    <string name="nav_queue">Cola</string>
+
+    <!-- Player screen -->
+    <string name="player_header_label">CONEXIÓN INNIOASIS Y2</string>
+    <string name="cd_album_art">Carátula del álbum</string>
+    <string name="cd_previous">Anterior</string>
+    <string name="cd_play_pause">Reproducir/Pausar</string>
+    <string name="cd_next">Siguiente</string>
+    <string name="cd_volume_down">Bajar volumen</string>
+    <string name="cd_volume_up">Subir volumen</string>
+
+    <!-- Library -->
+    <string name="search_hint">Buscar canciones, artistas, álbumes…</string>
+    <string name="empty_library">No se encontraron canciones</string>
+    <string name="unknown_title">Título desconocido</string>
+    <string name="unknown_year">Año desconocido</string>
+    <string name="unknown_label">Desconocido</string>
+    <string name="sort_title">Título</string>
+    <string name="sort_artist">Artista</string>
+    <string name="sort_album">Álbum</string>
+    <string name="sort_year">Año</string>
+    <string name="sort_added">Fecha de alta</string>
+    <string name="sort_recent">Modificado recientemente</string>
+
+    <!-- Tracks / Track row -->
+    <string name="cd_track_artwork">Carátula de la canción</string>
+    <string name="cd_options">Opciones</string>
+    <string name="track_action_play_next">Reproducir siguiente</string>
+    <string name="track_action_add_to_up_next">Añadir a continuación</string>
+    <string name="track_action_add_to_playlist">Añadir a playlist</string>
+    <string name="track_action_remove_from_playlist">Quitar de playlist</string>
+
+    <!-- Playlists -->
+    <string name="create_playlist">Nueva playlist</string>
+    <string name="rename_playlist">Renombrar</string>
+    <string name="delete_playlist">Eliminar</string>
+    <string name="empty_playlists">No hay playlists disponibles</string>
+    <string name="playlist_name_hint">Nombre de la playlist</string>
+    <string name="delete_playlist_confirm_fmt">¿Seguro que quieres eliminar \'%1$s\'?</string>
+    <string name="cd_playlist_icon">Icono de playlist</string>
+    <string name="cd_playlist_options">Opciones de playlist</string>
+    <string name="playlist_subtitle">Playlist</string>
+    <string name="playlist_load_error">Error al cargar las canciones de la playlist</string>
+
+    <!-- Queue -->
+    <string name="empty_queue">La cola de reproducción está vacía</string>
+    <string name="queue_up_next">A continuación</string>
+    <string name="queue_remaining">Resto</string>
+    <string name="queue_promote">Reproducir siguiente</string>
+    <string name="queue_remove">Quitar</string>
+    <string name="queue_clear_up_next">Vaciar «A continuación»</string>
+    <string name="queue_clear_remaining">Vaciar el resto</string>
+    <string name="queue_clear_all">Vaciar todo</string>
+    <string name="cd_shuffle">Aleatorio</string>
+    <string name="cd_repeat">Repetir</string>
+    <string name="cd_menu">Menú</string>
+    <string name="cd_playing">Reproduciendo</string>
+    <string name="cd_artwork">Carátula</string>
+    <string name="cd_promote">Subir</string>
+    <string name="cd_remove">Quitar</string>
+    <string name="cd_drag_to_reorder">Arrastra para reordenar</string>
+
+    <!-- Tile / dialogs -->
+    <string name="cd_tile_artwork">Carátula del mosaico</string>
+    <string name="cd_header_artwork">Carátula del encabezado</string>
+    <string name="cd_back">Atrás</string>
+    <string name="cd_play_all">Reproducir todo</string>
+    <string name="tile_type_artist">Artista</string>
+    <string name="tile_type_year">Año</string>
+    <string name="section_discography">DISCOGRAFÍA / ÁLBUMES</string>
+    <string name="section_albums_from_year">ÁLBUMES DE ESTE AÑO</string>
+    <string name="tile_all_songs">Todas las canciones</string>
+    <string name="tile_singles_other">Sencillos / Otros</string>
+    <string name="single_or_other">Sencillo / Otro</string>
+    <plurals name="count_songs">
+        <item quantity="one">1 canción</item>
+        <item quantity="other">%d canciones</item>
+    </plurals>
+    <plurals name="count_albums">
+        <item quantity="one">1 álbum</item>
+        <item quantity="other">%d álbumes</item>
+    </plurals>
+    <string name="filter_all_albums_fmt">Todos los álbumes (%1$d)</string>
+    <string name="filter_album_count_fmt">%1$s (%2$d)</string>
+
+    <!-- Add-to-playlist dialog -->
+    <string name="dialog_no_playlists">Sin playlists</string>
+    <string name="dialog_no_playlists_message">No hay playlists disponibles para añadir esta canción.</string>
+    <string name="dialog_no_playlists_message_create_first">Crea primero una playlist desde la pestaña Playlists.</string>
+    <string name="dialog_add_to_playlist">Añadir a playlist</string>
+    <string name="dialog_no_other_playlists">No hay otras playlists</string>
+
+    <!-- Feature disabled -->
+    <string name="feature_disabled_library">El uso compartido de la biblioteca está deshabilitado en el reproductor</string>
+    <string name="feature_disabled_playlists">El uso compartido de playlists está deshabilitado en el reproductor</string>
+    <string name="feature_disabled_queue">El uso compartido de la cola está deshabilitado en el reproductor</string>
+
+    <!-- Library Sync -->
+    <string name="sync_library">Sincronizar biblioteca</string>
+    <string name="sync_in_progress">Sincronizando biblioteca…</string>
+    <string name="sync_completed">Biblioteca sincronizada</string>
+    <string name="sync_not_connected">Conecta al reproductor Y2 para sincronizar</string>
+    <string name="sync_status_fmt">Sincronizado: %1$s</string>
+    <string name="sync_never">Aún no sincronizado</string>
+    <string name="sync_channel_name">Sincronización de biblioteca</string>
+    <string name="sync_channel_description">Progreso de sincronización de canciones y carátulas</string>
+    <string name="sync_started">Iniciando sincronización…</string>
+    <string name="sync_saving">Guardando canciones en caché local…</string>
+    <string name="sync_organizing_art">Organizando carátulas en caché…</string>
+    <string name="sync_error_connect">Conecta al reproductor para sincronizar</string>
+    <string name="sync_error_receive">Error recibiendo datos del reproductor</string>
+    <string name="sync_error_generic">Error de sincronización</string>
+    <string name="sync_notification_error_title">Error de sincronización</string>
+    <string name="sync_artwork_title">Descargando carátulas</string>
+    <string name="sync_songs_fmt">Sincronizando canciones (%1$d/%2$d)…</string>
+    <string name="sync_artwork_fmt">Descargando carátulas (%1$d/%2$d)…</string>
+    <string name="sync_completed_fmt">Sincronización completada (%1$s)</string>
+
+    <!-- Media notification actions -->
+    <string name="media_action_previous">Anterior</string>
+    <string name="media_action_play">Reproducir</string>
+    <string name="media_action_pause">Pausar</string>
+    <string name="media_action_next">Siguiente</string>
+</resources>

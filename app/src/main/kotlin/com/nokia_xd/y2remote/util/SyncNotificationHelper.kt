@@ -30,10 +30,10 @@ class SyncNotificationHelper(private val context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "Library Synchronization",
+                context.getString(R.string.sync_channel_name),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "Progress for syncing songs and artwork"
+                description = context.getString(R.string.sync_channel_description)
                 setShowBadge(false)
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
@@ -94,11 +94,11 @@ class SyncNotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val songsText = if (totalTracks == 1) "1 song" else "$totalTracks songs"
+        val songsText = context.resources.getQuantityString(R.plurals.count_songs, totalTracks, totalTracks)
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Sync Completed")
-            .setContentText("$songsText synchronized successfully")
+            .setContentTitle(context.getString(R.string.sync_completed))
+            .setContentText(context.getString(R.string.sync_completed_fmt, songsText))
             .setContentIntent(pendingIntent)
             .setOngoing(false)
             .setAutoCancel(true)
@@ -126,7 +126,7 @@ class SyncNotificationHelper(private val context: Context) {
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("Sync Error")
+            .setContentTitle(context.getString(R.string.sync_notification_error_title))
             .setContentText(error)
             .setContentIntent(pendingIntent)
             .setOngoing(false)

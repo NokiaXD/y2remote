@@ -32,7 +32,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="INNIOASIS Y2 CONNECTION"
+                    android:text="@string/player_header_label"
                     android:textColor="@color/accent"
                     android:textSize="12sp"
                     android:textStyle="bold"
@@ -127,7 +127,7 @@
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
                         android:src="@drawable/ic_notification"
-                        android:contentDescription="Album Art" />
+                        android:contentDescription="@string/cd_album_art" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <TextView
@@ -210,7 +210,7 @@
                         android:layout_height="54dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:src="@drawable/ic_skip_previous"
-                        android:contentDescription="Previous" />
+                        android:contentDescription="@string/cd_previous" />
 
                     <ImageButton
                         android:id="@+id/btnPlayPause"
@@ -219,7 +219,7 @@
                         android:layout_marginStart="20dp"
                         android:layout_marginEnd="20dp"
                         android:background="@drawable/ic_play"
-                        android:contentDescription="Play/Pause" />
+                        android:contentDescription="@string/cd_play_pause" />
 
                     <ImageButton
                         android:id="@+id/btnNext"
@@ -227,7 +227,7 @@
                         android:layout_height="54dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:src="@drawable/ic_skip_next"
-                        android:contentDescription="Next" />
+                        android:contentDescription="@string/cd_next" />
                 </LinearLayout>
 
                 <!-- Volume Control Row -->
@@ -244,7 +244,7 @@
                         android:layout_height="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:src="@drawable/ic_volume_down"
-                        android:contentDescription="Volume Down" />
+                        android:contentDescription="@string/cd_volume_down" />
 
                     <SeekBar
                         android:id="@+id/seekBarVolume"
@@ -260,7 +260,7 @@
                         android:layout_height="40dp"
                         android:background="?attr/selectableItemBackgroundBorderless"
                         android:src="@drawable/ic_volume_up"
-                        android:contentDescription="Volume Up" />
+                        android:contentDescription="@string/cd_volume_up" />
                 </LinearLayout>
 
             </LinearLayout>

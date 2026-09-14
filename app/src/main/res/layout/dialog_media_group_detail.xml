@@ -23,7 +23,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_arrow_back"
             app:tint="?attr/colorOnSurface"
-            android:contentDescription="Back" />
+            android:contentDescription="@string/cd_back" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -59,7 +59,7 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_play"
             app:tint="?attr/colorPrimary"
-            android:contentDescription="Play All" />
+            android:contentDescription="@string/cd_play_all" />
     </LinearLayout>
 
     <!-- Album Filter Chips (Displayed when viewing an Artist) -->

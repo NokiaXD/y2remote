@@ -6,6 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AlertDialog
+import androidx.core.view.WindowCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
@@ -25,13 +28,13 @@ class PlaylistTracksDialogFragment : DialogFragment() {
     private val binding get() = _binding!!
     private val viewModel: PlayerViewModel by activityViewModels()
 
+    private var trackAdapter: TrackAdapter? = null
     private var playlistId: Long = 0L
     private var playlistName: String = ""
-    private var trackAdapter: TrackAdapter? = null
 
     companion object {
-        private const val ARG_PLAYLIST_ID = "playlist_id"
-        private const val ARG_PLAYLIST_NAME = "playlist_name"
+        private const val ARG_PLAYLIST_ID = "arg_playlist_id"
+        private const val ARG_PLAYLIST_NAME = "arg_playlist_name"
 
         fun newInstance(playlistId: Long, playlistName: String): PlaylistTracksDialogFragment {
             return PlaylistTracksDialogFragment().apply {
@@ -47,7 +50,15 @@ class PlaylistTracksDialogFragment : DialogFragment() {
         super.onCreate(savedInstanceState)
         playlistId = arguments?.getLong(ARG_PLAYLIST_ID) ?: 0L
         playlistName = arguments?.getString(ARG_PLAYLIST_NAME).orEmpty()
-        setStyle(STYLE_NORMAL, android.R.style.Theme_DeviceDefault_NoActionBar_Fullscreen)
+        setStyle(STYLE_NORMAL, R.style.Theme_Y2Remote_FullScreenDialog)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        dialog?.window?.let { window ->
+            window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -57,6 +68,26 @@ class PlaylistTracksDialogFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            val topInset = maxOf(
+                bars.top,
+                insets.getInsetsIgnoringVisibility(WindowInsetsCompat.Type.systemBars()).top
+            )
+            v.setPadding(bars.left, topInset, bars.right, 0)
+            val basePad = (24 * resources.displayMetrics.density).toInt()
+            binding.rvPlaylistTracks.setPadding(
+                binding.rvPlaylistTracks.paddingLeft,
+                binding.rvPlaylistTracks.paddingTop,
+                binding.rvPlaylistTracks.paddingRight,
+                maxOf(basePad, bars.bottom)
+            )
+            WindowInsetsCompat.CONSUMED
+        }
+        ViewCompat.requestApplyInsets(binding.root)
 
         binding.tvPlaylistTitle.text = playlistName
         binding.tvPlaylistSubtitle.text = "Playlist"
@@ -75,7 +106,13 @@ class PlaylistTracksDialogFragment : DialogFragment() {
             coroutineScope = viewLifecycleOwner.lifecycleScope,
             isPlaylistMode = true,
             onTrackClick = { track ->
-                viewModel.replaceQueue(listOf(track.id), startIndex = 0, shuffled = false)
+                val allIds = trackAdapter?.snapshot()?.items?.map { it.id }.orEmpty()
+                val idx = allIds.indexOf(track.id).coerceAtLeast(0)
+                if (allIds.isNotEmpty()) {
+                    viewModel.replaceQueue(allIds, startIndex = idx, shuffled = false)
+                } else {
+                    viewModel.replaceQueue(listOf(track.id), startIndex = 0, shuffled = false)
+                }
             },
             onTrackAction = { track, action ->
                 when (action) {
@@ -90,6 +127,20 @@ class PlaylistTracksDialogFragment : DialogFragment() {
                 }
             }
         )
+
+        adapter.addLoadStateListener { loadState ->
+            val isListEmpty = loadState.refresh is androidx.paging.LoadState.NotLoading && adapter.itemCount == 0
+            if (loadState.refresh is androidx.paging.LoadState.Error) {
+                binding.tvEmptyTracks.text = "Error loading playlist tracks"
+                binding.tvEmptyTracks.visibility = View.VISIBLE
+            } else if (isListEmpty) {
+                binding.tvEmptyTracks.text = getString(R.string.empty_library)
+                binding.tvEmptyTracks.visibility = View.VISIBLE
+            } else {
+                binding.tvEmptyTracks.visibility = View.GONE
+            }
+        }
+
         trackAdapter = adapter
         binding.rvPlaylistTracks.layoutManager = LinearLayoutManager(requireContext())
         binding.rvPlaylistTracks.adapter = adapter
